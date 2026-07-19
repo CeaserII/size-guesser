@@ -59,7 +59,7 @@ if portal_view == "💻 Customer Sizing Terminal":
     st.sidebar.write("---")
     st.sidebar.markdown("### 🧬 Biometric Input Profiles")
     
-    # 💾 Local Profile Cloud Sync Loader Feature
+    # Local Profile Cloud Sync Loader Feature
     if st.session_state.saved_profiles:
         profile_names = ["-- Select a Saved Profile --"] + list(st.session_state.saved_profiles.keys())
         selected_saved = st.sidebar.selectbox("💾 Load Saved Cloud Profile:", profile_names)
@@ -68,7 +68,7 @@ if portal_view == "💻 Customer Sizing Terminal":
             st.sidebar.success(f"Loaded database values for '{selected_saved}'!")
     
     profile_username = st.sidebar.text_input("Profile User Registration Name:", placeholder="e.g., Alex Carter")
-    height_ft = st.sidebar.selectbox("Height (Feet):",, index=1)
+    height_ft = st.sidebar.selectbox("Height (Feet):", [4, 5, 6, 7], index=1)
     height_in = st.sidebar.slider("Height (Remaining Inches):", 0, 11, 7)
     weight_lbs = st.sidebar.number_input("Weight (Pounds):", min_value=70, max_value=400, value=160)
     body_build = st.sidebar.selectbox("Body Frame Build Style:", ["Slim / Lean Profile", "Balanced / Average", "Athletic / Broad Frame", "Heavy / Robust Build"])
@@ -85,7 +85,7 @@ if portal_view == "💻 Customer Sizing Terminal":
         st.header("Shirts & Tops Engineering Hub")
         input_method = st.tabs(["⚡ Fast Biometric Profile", "📏 Tailor-Fit Chest Calibration"])
         
-        with input_method:
+        with input_method[0]:
             shirt_cut = st.radio("Desired Fit Silhouette Cut:", ["Standard Fit Line", "Contoured Slim Fit", "Oversized Street Draping"])
             if st.button("Compute Optimal Tops Matrix 🚀", use_container_width=True):
                 size_code = "S" if density_bmi < 19.5 else ("M" if density_bmi < 24.8 else ("L" if density_bmi < 29.8 else "XL"))
@@ -95,7 +95,7 @@ if portal_view == "💻 Customer Sizing Terminal":
                 cal_metric_log = f"Estimated Shoulder Arcs: {15.5 + (0.8 * ['S','M','L','XL'].index(size_code)):.1f} inches"
                 brand_conversion_data = {"Nike": size_code, "Zara": "M" if size_code == "S" else size_code, "H&M Standard": size_code, "Adidas Performance": size_code}
 
-        with input_method:
+        with input_method[1]:
             chest_circumference = st.slider("Manual Chest Circumference (Inches):", 30, 54, 40)
             if st.button("Compute Precise Sizing Profile 🎯", use_container_width=True):
                 size_code = "S" if chest_circumference <= 37 else ("M" if chest_circumference <= 40 else ("L" if chest_circumference <= 43 else "XL"))
@@ -108,7 +108,7 @@ if portal_view == "💻 Customer Sizing Terminal":
         st.header("Pants & Denim Sizing Hub")
         input_method = st.tabs(["⚡ Fast Biometric Profile", "📏 Denim Inseam Calibration"])
         
-        with input_method:
+        with input_method[0]:
             if st.button("Compute Optimal Denim Matrix 🚀", use_container_width=True):
                 computed_waist = int(density_bmi * 1.22) + 4
                 if computed_waist % 2 != 0: computed_waist += 1
@@ -118,7 +118,7 @@ if portal_view == "💻 Customer Sizing Terminal":
                 cal_metric_log = f"Anatomical Hip Boundary Core: {final_waist - 1}.5 inches"
                 brand_conversion_data = {"Levi's 501": f"{final_waist}x{estimated_inseam}", "Zara Denim": f"US {final_waist-20}", "H&M Essentials": f"US {final_waist}"}
 
-        with input_method:
+        with input_method[1]:
             user_inseam_input = st.slider("Measured Inseam Leg Length (Inches):", 26, 36, 32)
             user_waist_input = st.number_input("Your Measured True Waist Line (Inches):", min_value=24, max_value=48, value=32)
             if st.button("Compute Exact Tailor Fit Profile 🎯", use_container_width=True):
@@ -133,7 +133,7 @@ if portal_view == "💻 Customer Sizing Terminal":
         st.header("Footwear & Brannock Sizing Hub")
         input_method = st.tabs(["⚡ Fast Biometric Profile", "📏 Wall-Paper Foot Tracing Calibration"])
         
-        with input_method:
+        with input_method[0]:
             foot_width = st.radio("Foot Width Structure Profile:", ["Standard D Width", "Wide Box Cut (E/EE Profile)"])
             socks_type = st.selectbox("Intended Sock Pairing Profile:", ["No Socks / Ultra Thin (Best for Sandals)", "Standard Casual Crew Socks", "Thick Winter Socks"])
             if st.button("Compute Footwear Sizing Matrix 🚀", use_container_width=True):
@@ -146,7 +146,7 @@ if portal_view == "💻 Customer Sizing Terminal":
                 cal_metric_log = f"Estimated Foot Length: {9.5 + (0.33 * final_shoe_val):.2f} inches"
                 brand_conversion_data = {"Nike Air Max": f"US {final_shoe_val}", "Adidas Originals": f"US {final_shoe_val + 0.5}", "Birkenstock": f"EU {int(final_shoe_val + 33)}"}
 
-        with input_method:
+        with input_method[1]:
             foot_inches_input = st.slider("Absolute Foot Length Dimension (Inches):", 8.0, 13.0, 10.5, step=0.1)
             if st.button("Execute Certified Brannock Scaling 🎯", use_container_width=True):
                 computed_brannock = (foot_inches_input * 3) - 22
