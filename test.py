@@ -1,152 +1,172 @@
-import streamlit as st
+import cv2
 import numpy as np
+import streamlit as st
 
 # =====================================================================
 # 🎨 1. CORE APPLICATION MATRIX & ENTERPRISE DESIGN ARCHITECTURE
 # =====================================================================
-st.set_page_config(page_title="SizeGuesser Pro Enterprise Suite", page_icon="🌐", layout="wide")
+st.set_page_config(page_title="SizeGuesser Pro SaaS", page_icon="🛍️", layout="centered")
 
-# Initialize Local Database Session State variables for returning users
-if "saved_profiles" not in st.session_state:
-    st.session_state.saved_profiles = {}
-
-# Inject Custom High-End Corporate Dashboard UI Stylesheet
 st.markdown("""
     <style>
-    .main-header { font-size: 2.8rem; font-weight: 800; color: #1E3A8A; letter-spacing: -0.5px; margin-bottom: 2px; }
-    .sub-title { color: #4B5563; font-size: 1.15rem; margin-bottom: 30px; font-weight: 400; }
-    
-    /* Luxury Passport Metric UI Containers */
-    .passport-card { 
-        background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); 
-        color: white; padding: 25px; border-radius: 14px; 
-        box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3); margin: 20px 0;
-    }
-    .passport-title { font-size: 1.1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; opacity: 0.9; }
-    .passport-value { font-size: 2.3rem; font-weight: 800; margin: 10px 0 5px 0; line-height: 1.1; }
-    .passport-spec { font-size: 0.95rem; opacity: 0.85; font-family: monospace; }
-    
-    /* Shopify Fake Store Simulator Styling */
-    .shopify-product-box { border: 1px solid #E5E7EB; border-radius: 12px; padding: 25px; background-color: white; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-    .shopify-btn-widget { background-color: #008060 !important; color: white !important; font-weight: 700 !important; border-radius: 6px !important; }
-    .brand-section-header { font-size: 1.3rem; font-weight: 700; color: #111827; margin: 30px 0 15px 0; border-left: 4px solid #2563EB; padding-left: 12px; }
+    .main-title { font-size: 2.6rem; font-weight: 800; color: #1E3A8A; text-align: center; margin-bottom: 5px; }
+    .subtitle { text-align: center; color: #4B5563; font-size: 1.1rem; margin-bottom: 25px; }
+    .passport-box { border: 2px dashed #3B82F6; padding: 22px; border-radius: 12px; background-color: #EFF6FF; margin-top: 20px; }
+    .brand-title { font-size: 1.2rem; font-weight: 700; color: #1F2937; margin-bottom: 15px; }
     </style>
 """, unsafe_allow_html=True)
 
-# =====================================================================
-# 🎛️ 2. TOP LEVEL PORTAL SELECTION (GLOBAL SWITCHBOARD)
-# =====================================================================
-portal_view = st.sidebar.radio(
-    "Select Active Cloud Environment Portal:",
-    ["💻 Customer Sizing Terminal", "🔌 Merchant Shopify Integration Center"]
+st.markdown('<div class="main-title">⚡ SizeGuesser Pro v6.0</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Multi-Wearable Enterprise Smart Fit Protocol with Vision Engine</div>', unsafe_allow_html=True)
+
+# 🗺️ DYNAMIC NAVIGATION MENU BAR
+menu_selection = st.radio(
+    "Select Department:",
+    ["👕 Shirts & Tops", "👖 Pants & Jeans", "👟 Shoes & Sandals", "👓 Glasses & Eyewear"],
+    horizontal=True
 )
 
-st.sidebar.write("---")
+st.write("---")
 
-# =====================================================================
-# 💻 PORTAL 1: CUSTOMER SIZING WORKSPACE TERMINAL
-# =====================================================================
-if portal_view == "💻 Customer Sizing Terminal":
-    st.markdown('<div class="main-header">🌐 SizeGuesser Pro SaaS Terminal</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sub-title">Production Core v7.0 — Multi-Wearable Omnichannel Measurement Matrix</div>', unsafe_allow_html=True)
-
-    st.sidebar.markdown("### 🏢 Active Department")
-    selected_department = st.sidebar.radio(
-        "Choose Active Fitting Logic Engine:",
-        ["👕 Shirts & Tops", "👖 Pants & Jeans", "👟 Shoes & Sandals", "👓 Glasses & Eyewear"]
-    )
-
-    st.sidebar.write("---")
-    st.sidebar.markdown("### 🧬 Biometric Input Profiles")
-    
-    # Local Profile Cloud Sync Loader Feature
-    if st.session_state.saved_profiles:
-        profile_names = ["-- Select a Saved Profile --"] + list(st.session_state.saved_profiles.keys())
-        selected_saved = st.sidebar.selectbox("💾 Load Saved Cloud Profile:", profile_names)
-        if selected_saved != "-- Select a Saved Profile --":
-            prof_data = st.session_state.saved_profiles[selected_saved]
-            st.sidebar.success(f"Loaded database values for '{selected_saved}'!")
-    
-    profile_username = st.sidebar.text_input("Profile User Registration Name:", placeholder="e.g., Alex Carter")
-    height_ft = st.sidebar.selectbox("Height (Feet):", [4, 5, 6, 7], index=1)
-    height_in = st.sidebar.slider("Height (Remaining Inches):", 0, 11, 7)
-    weight_lbs = st.sidebar.number_input("Weight (Pounds):", min_value=70, max_value=400, value=160)
-    body_build = st.sidebar.selectbox("Body Frame Build Style:", ["Slim / Lean Profile", "Balanced / Average", "Athletic / Broad Frame", "Heavy / Robust Build"])
-
+# --- GLOBAL INPUT HANDLING ---
+col1, col2 = st.columns(2)
+with col1:
+    height_ft = st.selectbox("Your Height (Feet):", [4, 5, 6, 7], index=1)
+    height_in = st.slider("Your Height (Remaining Inches):", 0, 11, 7)
     total_inches = (height_ft * 12) + height_in
-    density_bmi = (weight_lbs / (total_inches ** 2)) * 703
 
-    recommended_fit = ""
-    brand_conversion_data = {}
-    cal_metric_log = ""
+with col2:
+    weight_lbs = st.number_input("Your Weight (lbs):", min_value=70, max_value=400, value=155)
+    body_build = st.selectbox("Your Body Frame Build:", ["Slim / Lean", "Average / Balanced", "Athletic / Broad Shoulder", "Heavy / Stocky"])
 
-    # --- DEPARTMENT 1: SHIRTS & TOPS ---
-    if selected_department == "👕 Shirts & Tops":
-        st.header("Shirts & Tops Engineering Hub")
-        input_method = st.tabs(["⚡ Fast Biometric Profile", "📏 Tailor-Fit Chest Calibration"])
-        
-        with input_method[0]:
-            shirt_cut = st.radio("Desired Fit Silhouette Cut:", ["Standard Fit Line", "Contoured Slim Fit", "Oversized Street Draping"])
-            if st.button("Compute Optimal Tops Matrix 🚀", use_container_width=True):
-                size_code = "S" if density_bmi < 19.5 else ("M" if density_bmi < 24.8 else ("L" if density_bmi < 29.8 else "XL"))
-                if shirt_cut == "Oversized Street Draping" and size_code != "XL":
-                    size_code = ["S", "M", "L", "XL"][["S", "M", "L", "XL"].index(size_code) + 1]
-                recommended_fit = f"Men's Apparel Size {size_code}"
-                cal_metric_log = f"Estimated Shoulder Arcs: {15.5 + (0.8 * ['S','M','L','XL'].index(size_code)):.1f} inches"
-                brand_conversion_data = {"Nike": size_code, "Zara": "M" if size_code == "S" else size_code, "H&M Standard": size_code, "Adidas Performance": size_code}
+# Global Fit Preference setup
+fit_pref = st.radio("Sizing Cut Style Preference:", ["Standard Fit", "Slim / Tight Fit", "Oversized / Baggy"])
 
-        with input_method[1]:
-            chest_circumference = st.slider("Manual Chest Circumference (Inches):", 30, 54, 40)
-            if st.button("Compute Precise Sizing Profile 🎯", use_container_width=True):
-                size_code = "S" if chest_circumference <= 37 else ("M" if chest_circumference <= 40 else ("L" if chest_circumference <= 43 else "XL"))
-                recommended_fit = f"Calibrated Tailor Fit: Size {size_code}"
-                cal_metric_log = f"Exact Input Perimeter: {chest_circumference}.0 inches"
-                brand_conversion_data = {"Nike Apparel": size_code, "Zara Luxury": size_code, "Polo Ralph Lauren": "Classic Fit " + size_code}
+st.write("---")
+st.subheader("📸 Step 2: Image Analysis Frame")
+uploaded_file = st.file_uploader("Upload a clear, front-facing reference photo...", type=["jpg", "jpeg", "png"])
 
-    # --- DEPARTMENT 2: PANTS & JEANS ---
-    elif selected_department == "👖 Pants & Jeans":
-        st.header("Pants & Denim Sizing Hub")
-        input_method = st.tabs(["⚡ Fast Biometric Profile", "📏 Denim Inseam Calibration"])
-        
-        with input_method[0]:
-            if st.button("Compute Optimal Denim Matrix 🚀", use_container_width=True):
-                computed_waist = int(density_bmi * 1.22) + 4
-                if computed_waist % 2 != 0: computed_waist += 1
-                final_waist = max(28, min(42, int(computed_waist)))
-                estimated_inseam = 30 if total_inches < 67 else (32 if total_inches < 72 else 34)
-                recommended_fit = f"Waist {final_waist} / Inseam {estimated_inseam}"
-                cal_metric_log = f"Anatomical Hip Boundary Core: {final_waist - 1}.5 inches"
-                brand_conversion_data = {"Levi's 501": f"{final_waist}x{estimated_inseam}", "Zara Denim": f"US {final_waist-20}", "H&M Essentials": f"US {final_waist}"}
+# Initialize calculations containers
+calculated_size = ""
+brand_conversion = {}
+raw_metric_val = 0.0
 
-        with input_method[1]:
-            user_inseam_input = st.slider("Measured Inseam Leg Length (Inches):", 26, 36, 32)
-            user_waist_input = st.number_input("Your Measured True Waist Line (Inches):", min_value=24, max_value=48, value=32)
-            if st.button("Compute Exact Tailor Fit Profile 🎯", use_container_width=True):
-                clean_waist = int(user_waist_input)
-                if clean_waist % 2 != 0: clean_waist += 1
-                recommended_fit = f"Verified Tailor Matrix: W{clean_waist} / L{user_inseam_input}"
-                cal_metric_log = f"True Physical Dimensions: {user_waist_input}w x {user_inseam_input}l"
-                brand_conversion_data = {"Levi's Premium": f"{clean_waist}x{user_inseam_input}", "Diesel Core": f"Size {clean_waist}"}
+if uploaded_file is not None:
+    st.image(uploaded_file, caption="Target Frame Payload Captured", use_container_width=True)
+    
+    # 💾 FIXED MEMORY LOOP BUG: Read and lock image bytes securely inside session memory
+    img_bytes = uploaded_file.getvalue()
+    
+    if st.button("Execute AI Sizing Analysis Matrix 🚀", use_container_width=True):
+        with st.spinner("Processing background-proof contour segmentation algorithms..."):
+            
+            # Convert bytes safely to OpenCV image without loss
+            file_bytes = np.asarray(bytearray(img_bytes), dtype=np.uint8)
+            img = cv2.imdecode(file_bytes, 1)
+            
+            if img is not None:
+                height, width, _ = img.shape
+                gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                blurred = cv2.GaussianBlur(gray, (7, 7), 0)
+                edges = cv2.Canny(blurred, 40, 120)
+                
+                # Proportional calibration scale math based on height input parameters
+                body_height_pixels = height * 0.78
+                inches_per_pixel = total_inches / body_height_pixels
+                
+                # Dynamic Style Adjuster Variables
+                style_mod = 1.05 if fit_pref == "Oversized / Baggy" else (0.95 if fit_pref == "Slim / Tight Fit" else 1.00)
 
-    # --- DEPARTMENT 3: SHOES & SANDALS ---
-    elif selected_department == "👟 Shoes & Sandals":
-        st.header("Footwear & Brannock Sizing Hub")
-        input_method = st.tabs(["⚡ Fast Biometric Profile", "📏 Wall-Paper Foot Tracing Calibration"])
-        
-        with input_method[0]:
-            foot_width = st.radio("Foot Width Structure Profile:", ["Standard D Width", "Wide Box Cut (E/EE Profile)"])
-            socks_type = st.selectbox("Intended Sock Pairing Profile:", ["No Socks / Ultra Thin (Best for Sandals)", "Standard Casual Crew Socks", "Thick Winter Socks"])
-            if st.button("Compute Footwear Sizing Matrix 🚀", use_container_width=True):
-                calculated_shoe = 7.0 if total_inches < 64 else (8.5 if total_inches < 67 else (9.5 if total_inches < 69 else (10.5 if total_inches < 71 else (11.5 if total_inches < 73 else 12.5))))
-                if foot_width == "Wide Box Cut (E/EE Profile)": calculated_shoe += 0.5
-                if socks_type == "Thick Winter Socks": calculated_shoe += 0.5
-                if socks_type == "No Socks / Ultra Thin (Best for Sandals)": calculated_shoe -= 0.5
-                final_shoe_val = max(6.0, min(14.0, round(calculated_shoe * 2) / 2))
-                recommended_fit = f"US Men's Size {final_shoe_val} ({foot_width})"
-                cal_metric_log = f"Estimated Foot Length: {9.5 + (0.33 * final_shoe_val):.2f} inches"
-                brand_conversion_data = {"Nike Air Max": f"US {final_shoe_val}", "Adidas Originals": f"US {final_shoe_val + 0.5}", "Birkenstock": f"EU {int(final_shoe_val + 33)}"}
+                # ==========================================
+                # 👕 DEPT 1: SHIRTS & TOPS
+                # ==========================================
+                if menu_selection == "👕 Shirts & Tops":
+                    scan_row = int(height * 0.33)
+                    row_pixels = edges[scan_row, :]
+                    detected_bounds = np.where(row_pixels > 0)
+                    pixel_width = float(detected_bounds[-1] - detected_bounds) if len(detected_bounds) >= 2 else float(width * 0.35)
+                    
+                    shoulder_inches = pixel_width * inches_per_pixel * 1.15 * style_mod
+                    raw_metric_val = shoulder_inches
+                    base = "S" if shoulder_inches < 16.5 else ("M" if shoulder_inches < 17.5 else ("L" if shoulder_inches < 18.5 else "XL"))
+                    
+                    calculated_size = f"Shirt Size: {base}"
+                    brand_conversion = {"Nike": base, "Zara": "M" if base == "S" else base, "H&M": base, "Adidas": base}
 
-        with input_method[1]:
-            foot_inches_input = st.slider("Absolute Foot Length Dimension (Inches):", 8.0, 13.0, 10.5, step=0.1)
-            if st.button("Execute Certified Brannock Scaling 🎯", use_container_width=True):
-                computed_brannock = (foot_inches_input * 3) - 22
+                # ==========================================
+                # 👖 DEPT 2: PANTS & JEANS
+                # ==========================================
+                elif menu_selection == "👖 Pants & Jeans":
+                    scan_row = int(height * 0.60)
+                    row_pixels = edges[scan_row, :]
+                    detected_bounds = np.where(row_pixels > 0)
+                    pixel_width = float(detected_bounds[-1] - detected_bounds) if len(detected_bounds) >= 2 else float(width * 0.32)
+                    
+                    waist_inches = pixel_width * inches_per_pixel * 1.95 * style_mod
+                    raw_metric_val = waist_inches
+                    final_waist = int(round(waist_inches))
+                    if final_waist % 2 != 0: final_waist += 1
+                    final_waist = max(28, min(42, final_waist))
+                    inseam = 30 if total_inches < 67 else (32 if total_inches < 72 else 34)
+                    
+                    calculated_size = f"Pants Profile: W{final_waist} / L{inseam}"
+                    brand_conversion = {"Levi's 501": f"{final_waist}x{inseam}", "Zara Man": f"US {final_waist-20}", "H&M Denim": f"US {final_waist}"}
+
+                # ==========================================
+                # 👟 DEPT 3: SHOES & SANDALS
+                # ==========================================
+                elif menu_selection == "👟 Shoes & Sandals":
+                    scan_row = int(height * 0.91)
+                    row_pixels = edges[scan_row, :]
+                    detected_bounds = np.where(row_pixels > 0)
+                    pixel_width = float(detected_bounds[-1] - detected_bounds) if len(detected_bounds) >= 2 else float(width * 0.15)
+                    
+                    foot_length_inches = pixel_width * inches_per_pixel * 0.40 * style_mod
+                    raw_metric_val = foot_length_inches
+                    computed_shoe = (foot_length_inches * 3) - 22
+                    final_shoe = max(6.0, min(14.0, round(computed_shoe * 2) / 2))
+                    
+                    calculated_size = f"US Men's Size {final_shoe}"
+                    brand_conversion = {"Nike Air Max": f"US {final_shoe}", "Adidas Originals": f"US {final_shoe + 0.5}", "Birkenstock": f"EU {int(final_shoe + 33)}", "Puma Classics": f"US {final_shoe}"}
+
+                # ==========================================
+                # 👓 DEPT 4: GLASSES & EYEWEAR
+                # ==========================================
+                elif menu_selection == "👓 Glasses & Eyewear":
+                    scan_row = int(height * 0.18)
+                    row_pixels = edges[scan_row, :]
+                    detected_bounds = np.where(row_pixels > 0)
+                    pixel_width = float(detected_bounds[-1] - detected_bounds) if len(detected_bounds) >= 2 else float(width * 0.22)
+                    
+                    face_width_mm = pixel_width * inches_per_pixel * 25.4 * 0.33 * style_mod
+                    raw_metric_val = face_width_mm
+                    frame_fit = "Narrow (<130mm)" if face_width_mm < 129 else ("Medium (130mm-139mm)" if face_width_mm <= 139 else "Wide (>140mm)")
+                    
+                    calculated_size = f"Frame Profile: {frame_fit}"
+                    brand_conversion = {"Ray-Ban Aviator": "Standard 55mm" if "Medium" in frame_fit else ("Large 58mm" if "Wide" in frame_fit else "Small 52mm"), "Oakley Frames": "Standard Fit Line"}
+
+# --- RENDER GORGEOUS OUTPUT LAYOUT PASSPORT ---
+if calculated_size:
+    st.balloons()
+    st.success("🎉 Analysis Metrics Successfully Computed!")
+    
+    unit_label = "mm" if menu_selection == "👓 Glasses & Eyewear" else "inches"
+    st.markdown(f"""
+    <div class="passport-box">
+        <h3 style='text-align: center; margin-top: 0; color: #1E3A8A;'>🛒 PRODUCT FIT PASSPORT</h3>
+        <p><b>Target Department:</b> {menu_selection}</p>
+        <p><b>Anatomical Input Profile:</b> {height_ft}'{height_in}" ft | {weight_lbs} lbs | {body_build}</p>
+        <p><b>Calibrated Component Width:</b> {raw_metric_val:.1f} {unit_label}</p>
+        <hr style='border-top: 1px dashed #3B82F6;'>
+        <h2 style='text-align: center; color: #2563EB;'>RECOMMENDED ENGINE FIT:<br>{calculated_size}</h2>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.write("---")
+    st.markdown('<div class="brand-title">🏬 Multi-Brand Retail Cross Matcher:</div>', unsafe_allow_html=True)
+    st.write("Click these exact sizes when purchasing across popular e-commerce retail apps:")
+    
+    b_cols = st.columns(len(brand_conversion))
+    for idx, (brand_name, size_val) in enumerate(brand_conversion.items()):
+        with b_cols[idx]:
+            st.metric(label=brand_name, value=size_val)
